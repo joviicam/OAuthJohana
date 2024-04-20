@@ -1,16 +1,29 @@
-import './assets/main.css'
+import Vue from 'vue';
+import App from './App.vue';
+import router from './router';
 
-import { createApp } from 'vue'
-import App from './App.vue'
-import router from './router'
-import vue3GoogleLogin from 'vue3-google-login'
+// Import the Auth0 configuration
+import { domain, clientId } from '../auth_config.json';
 
-const CLIENT_ID = '985359202343-loevv2lc6150bn0i0mi534sttm8kipef.apps.googleusercontent.com'
-const app = createApp(App)
+// Import the plugin here
+import { Auth0Plugin } from './auth';
 
-app.use(router)
-app.use(vue3GoogleLogin), {
-    clientId: CLIENT_ID,
+// Install the authentication plugin here
+Vue.use(Auth0Plugin, {
+    domain,
+    clientId,
+    onRedirectCallback: appState => {
+        router.push(
+            appState && appState.targetUrl
+                ? appState.targetUrl
+                : window.location.pathname
+        );
+    }
+});
 
-}
-app.mount('#app')
+Vue.config.productionTip = false;
+
+new Vue({
+    router,
+    render: h => h(App)
+}).$mount('#app');
